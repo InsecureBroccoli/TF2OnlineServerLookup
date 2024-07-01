@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rumblefrog/go-a2s"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -39,11 +40,29 @@ func getServerInfo(c *gin.Context) {
 		return
 	}
 
+	playerInfo, err := client.QueryPlayer()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "internal server error",
+		})
+		return
+	}
+
+	players := make([]gin.H, 0, len(playerInfo.Players))
+	for _, player := range playerInfo.Players {
+		players = append(players, gin.H{
+			"name":     player.Name,
+			"score":    player.Score,
+			"duration": time.Duration(player.Duration * float32(time.Second)).Round(time.Millisecond).String(),
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"name":        serverInfo.Name,
-		"map":         serverInfo.Map,
-		"players":     serverInfo.Players - serverInfo.Bots,
-		"max_players": serverInfo.MaxPlayers,
-		"bots":        serverInfo.Bots,
+		"name":         serverInfo.Name,
+		"map":          serverInfo.Map,
+		"player_count": serverInfo.Players - serverInfo.Bots,
+		"max_players":  serverInfo.MaxPlayers,
+		"bot_count":    serverInfo.Bots,
+		"players":      players,
 	})
 }
