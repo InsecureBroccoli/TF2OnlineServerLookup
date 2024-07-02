@@ -9,6 +9,9 @@ import (
 
 func main() {
 	r := gin.Default()
+	r.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	})
 	r.GET("/getserverinfo", getServerInfo)
 	r.Run()
 }
