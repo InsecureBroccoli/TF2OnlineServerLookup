@@ -12,7 +12,7 @@ func main() {
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 	})
-	r.GET("/getserverinfo", getServerInfo)
+	r.GET("/api/v1/getserverinfo", getServerInfo)
 	r.Run()
 }
 
