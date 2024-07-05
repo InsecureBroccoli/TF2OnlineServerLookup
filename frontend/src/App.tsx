@@ -10,7 +10,7 @@ function App() {
 
     const getServerInfo = async () => {
         setLoading(true)
-        fetch(`${BACKEND_URL}/getserverinfo?address=${address}`)
+        fetch(`${BACKEND_URL}/api/v1/getserverinfo?address=${address}`)
             .then((response) => response.json())
             .then((data) => setServerData(data))
             .catch((e) => console.error(e))
