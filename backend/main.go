@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/rumblefrog/go-a2s"
+	"log"
 	"net/http"
 	"time"
 )
@@ -20,16 +21,26 @@ func getServerInfo(c *gin.Context) {
 	address := c.Query("address")
 	if address == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "missing required address query parameter",
+			"error": "Missing required address query parameter",
 		})
+		log.Println("missing required address query parameter")
+		return
+	}
+
+	if !validateAddress(address) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid address",
+		})
+		log.Println("invalid address")
 		return
 	}
 
 	client, err := a2s.NewClient(address)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "internal server error",
+			"error": "Internal server error",
 		})
+		log.Println("unable to create a2s client:", err)
 		return
 	}
 
@@ -38,16 +49,18 @@ func getServerInfo(c *gin.Context) {
 	serverInfo, err := client.QueryInfo()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "internal server error",
+			"error": "Unable to get server info",
 		})
+		log.Println("unable to query server info:", err)
 		return
 	}
 
 	playerInfo, err := client.QueryPlayer()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "internal server error",
+			"error": "Unable to get player info",
 		})
+		log.Println("unable to query player info:", err)
 		return
 	}
 
