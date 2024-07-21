@@ -25,6 +25,13 @@ func getServerInfo(c *gin.Context) {
 		return
 	}
 
+	if !validateAddress(address) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid address",
+		})
+		return
+	}
+
 	client, err := a2s.NewClient(address)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
