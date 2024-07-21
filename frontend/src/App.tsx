@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {Button, CircularProgress, TextField} from "@mui/material";
+import {Alert, Button, CircularProgress, Snackbar, TextField} from "@mui/material";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
@@ -8,6 +8,8 @@ function App() {
     const [address, setAddress] = useState("")
     const [serverData, setServerData] = useState(null)
     const [addressValidationError, setAddressValidationError] = useState(false)
+    const [requestError, setRequestError] = useState(false)
+    const [requestErrorReason, setRequestErrorReason] = useState("")
 
     const getServerInfo = async () => {
         if (!validateAddress(address)) {
@@ -17,9 +19,24 @@ function App() {
 
         setLoading(true)
         fetch(`${BACKEND_URL}/api/v1/getserverinfo?address=${address}`)
-            .then((response) => response.json())
-            .then((data) => setServerData(data))
-            .catch((e) => console.error(e))
+            .catch((e) => {
+                setRequestErrorReason("Unable to connect to backend")
+                throw e
+            })
+            .then((response) => {
+                return response.json()
+            })
+            .then((data) => {
+                if (data.error !== undefined) {
+                    setRequestErrorReason(data.error)
+                    throw new Error(`Received error from backend: ${data.error}`)
+                }
+                setServerData(data)
+            })
+            .catch((e) => {
+                setRequestError(true)
+                console.error(e)
+            })
             .finally(() => setLoading(false))
     }
 
@@ -41,6 +58,12 @@ function App() {
             }}/>
             <Button variant="contained" onClick={getServerInfo}>Submit</Button>
             {loading && <CircularProgress/>}
+            <Snackbar open={requestError} autoHideDuration={5000} onClose={() => {
+                setRequestError(false)
+                setRequestErrorReason("")
+            }}>
+                <Alert severity="error">{requestErrorReason}</Alert>
+            </Snackbar>
             {serverData && <pre>{JSON.stringify(serverData, null, 2)}</pre>}
         </>
     )
