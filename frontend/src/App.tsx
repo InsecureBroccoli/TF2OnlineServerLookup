@@ -1,5 +1,15 @@
 import {useEffect, useState} from 'react'
-import {Alert, Button, CircularProgress, Snackbar, TextField} from "@mui/material";
+import {
+    Alert,
+    Button,
+    CircularProgress,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select, SelectChangeEvent,
+    Snackbar,
+    TextField
+} from "@mui/material";
 import {Favorite, ServerData} from "./types.ts";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
@@ -82,6 +92,16 @@ function App() {
 
     return (
         <>
+            <FormControl>
+                <InputLabel>Favorites</InputLabel>
+                <Select onChange={(event: SelectChangeEvent) => { setAddress(event.target.value) }}>
+                    {favorites.map((favorite) => {
+                        return <MenuItem value={favorite.address}>
+                            {favorite.name}
+                        </MenuItem>
+                    })}
+                </Select>
+            </FormControl>
             <TextField error={addressValidationError}
                        helperText={addressValidationError && "Invalid IP Address"}
                        label="IP Address" value={address}
