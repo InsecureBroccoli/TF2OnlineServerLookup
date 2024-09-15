@@ -1,15 +1,36 @@
-import {useState} from 'react'
-import {Alert, Button, CircularProgress, Snackbar, TextField} from "@mui/material";
+import {useEffect, useState} from 'react'
+import {
+    Alert,
+    Button,
+    CircularProgress,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select, SelectChangeEvent,
+    Snackbar,
+    TextField
+} from "@mui/material";
+import {Favorite, ServerData} from "./types.ts";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 function App() {
     const [loading, setLoading] = useState(false)
     const [address, setAddress] = useState("")
-    const [serverData, setServerData] = useState(null)
+    const [currentAddress, setCurrentAddress] = useState("")
+    const [serverData, setServerData] = useState<ServerData | null>(null)
     const [addressValidationError, setAddressValidationError] = useState(false)
     const [requestError, setRequestError] = useState(false)
     const [requestErrorReason, setRequestErrorReason] = useState("")
+
+    const [favorites, setFavorites] = useState<Favorite[]>([])
+
+    useEffect(() => {
+        const savedFavorites = localStorage.getItem('favorites')
+        if (savedFavorites !== null) {
+            setFavorites(JSON.parse(savedFavorites))
+        }
+    }, [])
 
     const getServerInfo = async () => {
         if (!validateAddress(address)) {
@@ -31,6 +52,7 @@ function App() {
                     setRequestErrorReason(data.error)
                     throw new Error(`Received error from backend: ${data.error}`)
                 }
+                setCurrentAddress(address)
                 setServerData(data)
             })
             .catch((e) => {
@@ -38,6 +60,38 @@ function App() {
                 console.error(e)
             })
             .finally(() => setLoading(false))
+    }
+
+    const addFavorite = () => {
+        if (serverData === null) {
+            console.error('tried to add null as favorite')
+            return
+        }
+
+        const newFavorite: Favorite = {
+            name: serverData.name,
+            address: currentAddress
+        }
+
+        const sameFavoriteIndex = favorites.findIndex((value) => value.address === currentAddress)
+        if (sameFavoriteIndex === -1) {
+            favorites.push(newFavorite);
+        } else {
+            favorites[sameFavoriteIndex] = newFavorite;
+        }
+
+        localStorage.setItem('favorites', JSON.stringify(favorites))
+    }
+
+    const removeFavorite = () => {
+        const favoriteIndex = favorites.findIndex((value) => value.address === currentAddress)
+        if (favoriteIndex === -1) {
+            return;
+        }
+
+        favorites.splice(favoriteIndex, 1)
+
+        localStorage.setItem('favorites', JSON.stringify(favorites))
     }
 
     const validateAddress = (address: string): boolean => {
@@ -49,6 +103,16 @@ function App() {
 
     return (
         <>
+            <FormControl>
+                <InputLabel>Favorites</InputLabel>
+                <Select onChange={(event: SelectChangeEvent) => { setAddress(event.target.value) }}>
+                    {favorites.map((favorite) => {
+                        return <MenuItem value={favorite.address}>
+                            {favorite.name}
+                        </MenuItem>
+                    })}
+                </Select>
+            </FormControl>
             <TextField error={addressValidationError}
                        helperText={addressValidationError && "Invalid IP Address"}
                        label="IP Address" value={address}
@@ -57,6 +121,8 @@ function App() {
                 setAddressValidationError(false)
             }}/>
             <Button variant="contained" onClick={getServerInfo}>Submit</Button>
+            <Button variant="contained" onClick={addFavorite} disabled={serverData === null}>Add to Favorites</Button>
+            <Button variant="outlined" onClick={removeFavorite}>Remove from Favorites</Button>
             {loading && <CircularProgress/>}
             <Snackbar open={requestError} autoHideDuration={5000} onClose={() => {
                 setRequestError(false)
