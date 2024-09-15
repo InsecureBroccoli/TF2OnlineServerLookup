@@ -83,6 +83,17 @@ function App() {
         localStorage.setItem('favorites', JSON.stringify(favorites))
     }
 
+    const removeFavorite = () => {
+        const favoriteIndex = favorites.findIndex((value) => value.address === currentAddress)
+        if (favoriteIndex === -1) {
+            return;
+        }
+
+        favorites.splice(favoriteIndex, 1)
+
+        localStorage.setItem('favorites', JSON.stringify(favorites))
+    }
+
     const validateAddress = (address: string): boolean => {
         const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(:([0-9]{1,5}))?$/;
         const domainRegex = /^(?=.{1,253}$)(?!-)([A-Za-z0-9-]{1,63}(?<!-)\.)+[A-Za-z]{2,6}$/;
@@ -111,6 +122,7 @@ function App() {
             }}/>
             <Button variant="contained" onClick={getServerInfo}>Submit</Button>
             <Button variant="contained" onClick={addFavorite} disabled={serverData === null}>Add to Favorites</Button>
+            <Button variant="outlined" onClick={removeFavorite}>Remove from Favorites</Button>
             {loading && <CircularProgress/>}
             <Snackbar open={requestError} autoHideDuration={5000} onClose={() => {
                 setRequestError(false)
