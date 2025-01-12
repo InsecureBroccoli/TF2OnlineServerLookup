@@ -1,8 +1,8 @@
 export type Favorite = {
-    name: string;
-    address: string
-}
+  name: string;
+  address: string;
+};
 
 export type ServerData = {
-    name: string
-}
+  name: string;
+};
