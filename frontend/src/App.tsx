@@ -12,6 +12,7 @@ import {
   TextField,
 } from "@mui/material";
 import { Favorite, ServerData } from "./types.ts";
+import FavoritesModal from "./assets/favorites-modal.tsx";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -25,6 +26,8 @@ function App() {
   const [requestErrorReason, setRequestErrorReason] = useState("");
 
   const [favorites, setFavorites] = useState<Favorite[] | null>(null);
+
+  const [openFavoritesModal, setOpenFavoritesModal] = useState(false);
 
   useEffect(() => {
     if (favorites !== null) {
@@ -76,8 +79,8 @@ function App() {
     }
 
     if (favorites === null) {
-      console.error('tried to add favorite to null favorites list')
-      return
+      console.error("tried to add favorite to null favorites list");
+      return;
     }
 
     const newFavorite: Favorite = {
@@ -92,17 +95,20 @@ function App() {
       setFavorites((prevState) => [...(prevState ?? []), newFavorite]);
     } else {
       setFavorites((prevState) =>
-        prevState === null ? null :
-        prevState.map((fav) =>
-          fav.address === currentAddress ? newFavorite : fav,
-        ),
+        prevState === null
+          ? null
+          : prevState.map((fav) =>
+              fav.address === currentAddress ? newFavorite : fav,
+            ),
       );
     }
   };
 
   const removeFavorite = () => {
-    setFavorites((prevState) => prevState === null ? null :
-      prevState.filter((fav) => fav.address !== currentAddress),
+    setFavorites((prevState) =>
+      prevState === null
+        ? null
+        : prevState.filter((fav) => fav.address !== currentAddress),
     );
   };
 
@@ -126,11 +132,12 @@ function App() {
             setAddress(event.target.value);
           }}
         >
-          {favorites !== null && favorites.map((favorite) => {
-            return (
-              <MenuItem value={favorite.address}>{favorite.name}</MenuItem>
-            );
-          })}
+          {favorites !== null &&
+            favorites.map((favorite) => {
+              return (
+                <MenuItem value={favorite.address}>{favorite.name}</MenuItem>
+              );
+            })}
         </Select>
         <TextField
           margin={"normal"}
@@ -156,6 +163,9 @@ function App() {
         <Button variant="outlined" onClick={removeFavorite}>
           Remove from Favorites
         </Button>
+        <Button variant="contained" onClick={() => setOpenFavoritesModal(true)}>
+          Edit Favorites
+        </Button>
       </FormControl>
       {loading && <CircularProgress />}
       <Snackbar
@@ -169,6 +179,10 @@ function App() {
         <Alert severity="error">{requestErrorReason}</Alert>
       </Snackbar>
       {serverData && <pre>{JSON.stringify(serverData, null, 2)}</pre>}
+      <FavoritesModal
+        open={openFavoritesModal}
+        onClose={() => setOpenFavoritesModal(false)}
+      />
     </>
   );
 }
