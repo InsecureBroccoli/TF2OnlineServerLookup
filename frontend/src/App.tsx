@@ -113,6 +113,7 @@ function App() {
       <FormControl size={"medium"} margin={"normal"}>
         <InputLabel>Favorites</InputLabel>
         <Select
+          disabled={favorites.length === 0}
           onChange={(event: SelectChangeEvent) => {
             setAddress(event.target.value);
           }}
@@ -124,22 +125,22 @@ function App() {
           })}
         </Select>
         <TextField
-            error={addressValidationError}
-            helperText={addressValidationError && "Invalid IP Address"}
-            label="IP Address"
-            value={address}
-            onChange={(event) => {
-              setAddress(event.target.value);
-              setAddressValidationError(false);
-            }}
+          error={addressValidationError}
+          helperText={addressValidationError && "Invalid IP Address"}
+          label="IP Address"
+          value={address}
+          onChange={(event) => {
+            setAddress(event.target.value);
+            setAddressValidationError(false);
+          }}
         />
         <Button variant="contained" onClick={getServerInfo}>
           Submit
         </Button>
         <Button
-            variant="contained"
-            onClick={addFavorite}
-            disabled={serverData === null}
+          variant="contained"
+          onClick={addFavorite}
+          disabled={serverData === null}
         >
           Add to Favorites
         </Button>
