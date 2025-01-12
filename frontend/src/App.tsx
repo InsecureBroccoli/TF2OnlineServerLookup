@@ -110,9 +110,11 @@ function App() {
 
   return (
     <>
-      <FormControl>
+      <FormControl size={"medium"} margin={"normal"}>
         <InputLabel>Favorites</InputLabel>
         <Select
+          label={"Favorites"}
+          disabled={favorites.length === 0}
           onChange={(event: SelectChangeEvent) => {
             setAddress(event.target.value);
           }}
@@ -123,30 +125,31 @@ function App() {
             );
           })}
         </Select>
+        <TextField
+          margin={"normal"}
+          error={addressValidationError}
+          helperText={addressValidationError && "Invalid IP Address"}
+          label="IP Address"
+          value={address}
+          onChange={(event) => {
+            setAddress(event.target.value);
+            setAddressValidationError(false);
+          }}
+        />
+        <Button variant="contained" onClick={getServerInfo}>
+          Submit
+        </Button>
+        <Button
+          variant="contained"
+          onClick={addFavorite}
+          disabled={serverData === null}
+        >
+          Add to Favorites
+        </Button>
+        <Button variant="outlined" onClick={removeFavorite}>
+          Remove from Favorites
+        </Button>
       </FormControl>
-      <TextField
-        error={addressValidationError}
-        helperText={addressValidationError && "Invalid IP Address"}
-        label="IP Address"
-        value={address}
-        onChange={(event) => {
-          setAddress(event.target.value);
-          setAddressValidationError(false);
-        }}
-      />
-      <Button variant="contained" onClick={getServerInfo}>
-        Submit
-      </Button>
-      <Button
-        variant="contained"
-        onClick={addFavorite}
-        disabled={serverData === null}
-      >
-        Add to Favorites
-      </Button>
-      <Button variant="outlined" onClick={removeFavorite}>
-        Remove from Favorites
-      </Button>
       {loading && <CircularProgress />}
       <Snackbar
         open={requestError}
