@@ -125,6 +125,7 @@ function App() {
           })}
         </Select>
         <TextField
+          margin={"normal"}
           error={addressValidationError}
           helperText={addressValidationError && "Invalid IP Address"}
           label="IP Address"
