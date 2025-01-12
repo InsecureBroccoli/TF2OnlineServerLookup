@@ -113,6 +113,7 @@ function App() {
       <FormControl size={"medium"} margin={"normal"}>
         <InputLabel>Favorites</InputLabel>
         <Select
+          label={"Favorites"}
           disabled={favorites.length === 0}
           onChange={(event: SelectChangeEvent) => {
             setAddress(event.target.value);
