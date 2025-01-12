@@ -24,7 +24,13 @@ function App() {
   const [requestError, setRequestError] = useState(false);
   const [requestErrorReason, setRequestErrorReason] = useState("");
 
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [favorites, setFavorites] = useState<Favorite[] | null>(null);
+
+  useEffect(() => {
+    if (favorites !== null) {
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+    }
+  }, [favorites]);
 
   useEffect(() => {
     const savedFavorites = localStorage.getItem("favorites");
@@ -69,6 +75,11 @@ function App() {
       return;
     }
 
+    if (favorites === null) {
+      console.error('tried to add favorite to null favorites list')
+      return
+    }
+
     const newFavorite: Favorite = {
       name: serverData.name,
       address: currentAddress,
@@ -78,25 +89,21 @@ function App() {
       (value) => value.address === currentAddress,
     );
     if (sameFavoriteIndex === -1) {
-      favorites.push(newFavorite);
+      setFavorites((prevState) => [...(prevState ?? []), newFavorite]);
     } else {
-      favorites[sameFavoriteIndex] = newFavorite;
+      setFavorites((prevState) =>
+        prevState === null ? null :
+        prevState.map((fav) =>
+          fav.address === currentAddress ? newFavorite : fav,
+        ),
+      );
     }
-
-    localStorage.setItem("favorites", JSON.stringify(favorites));
   };
 
   const removeFavorite = () => {
-    const favoriteIndex = favorites.findIndex(
-      (value) => value.address === currentAddress,
+    setFavorites((prevState) => prevState === null ? null :
+      prevState.filter((fav) => fav.address !== currentAddress),
     );
-    if (favoriteIndex === -1) {
-      return;
-    }
-
-    favorites.splice(favoriteIndex, 1);
-
-    localStorage.setItem("favorites", JSON.stringify(favorites));
   };
 
   const validateAddress = (address: string): boolean => {
@@ -114,12 +121,12 @@ function App() {
         <InputLabel>Favorites</InputLabel>
         <Select
           label={"Favorites"}
-          disabled={favorites.length === 0}
+          disabled={favorites !== null && favorites.length === 0}
           onChange={(event: SelectChangeEvent) => {
             setAddress(event.target.value);
           }}
         >
-          {favorites.map((favorite) => {
+          {favorites !== null && favorites.map((favorite) => {
             return (
               <MenuItem value={favorite.address}>{favorite.name}</MenuItem>
             );
